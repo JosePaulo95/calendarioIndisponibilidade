@@ -138,7 +138,7 @@ function disponibilizarColuna(aux_date, index_ultimo_dia_mes){
 function indisponibilizarColuna(aux_date, index_ultimo_dia_mes){
 	for (var i = 0; (aux_date.getDate()+i)<=index_ultimo_dia_mes; i+=7) {
 		if(!dias_marcados.includes(formatDate(aux_date, i))){
-			indisponibilizar(formatDate(aux_date, i));
+			indisponibilizar(formatDate(aux_date, i), i);
 		}
 	}
 }
@@ -160,10 +160,40 @@ function marcarDiaClick(id){
 		indisponibilizar(id);
 	}
 }
-function indisponibilizar(id) {
+function indisponibilizar(id, delay=0) {
 	var elm = document.getElementById(id);
 	dias_marcados.push(id);
-	elm.style.backgroundColor = "rgb(215, 107, 107)";
+
+	setInterval(frame, 5);
+	var i = 0;
+	var r_alvo = 215;
+	var g_alvo = 107;
+	var b_alvo = 107;
+
+	var r_ini = 150;
+	var g_ini = 50;
+	var b_ini = 50;
+
+	var r_passo = (r_ini-r_alvo)/100;
+	var g_passo = (g_ini-g_alvo)/100;
+	var b_passo = (b_ini-b_alvo)/100;
+
+	function frame() {
+	    if (i>100) {
+	        clearInterval(id);
+	    } else {
+	    	delay-=1.5;
+	    	if(delay <= 0){
+	    		i++;
+	    		if(dias_marcados.includes(id)){
+	    			elm.style.backgroundColor = "rgb("+(r_ini-(i*r_passo))+","+(g_ini-(i*g_passo))+","+(b_ini-(i*b_passo))+")";
+	    		}else{
+	    			clearInterval(id);
+	    		}
+	    	}
+	    }
+	}
+	//elm.style.backgroundColor = "rgb(215, 107, 107)";
 }
 
 function disponibilizar(id) {
