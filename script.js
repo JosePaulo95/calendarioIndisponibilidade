@@ -13,14 +13,14 @@ document.body.onmouseup = function() {
 function marcarDiaSemana(dia_semana_desejado, index_mes, ano){
 	var primeiro_dia_mes = getPrimeiroDiaMes(index_mes, ano);
 	var primeiro_dia_coluna = caminharAteEncontrarDiaNaColuna(primeiro_dia_mes, dia_semana_desejado);
-	var ultimo_dia_mes = getUltimoDiaMes(index_mes, ano);
+	var index_ultimo_dia_mes = getIndexUltimoDiaMes(index_mes, ano);
 
-	var estao_dias_td_marcados_ = estaColunaTodaMarcada(primeiro_dia_coluna, ultimo_dia_mes);
+	var estao_dias_td_marcados_ = estaColunaTodaMarcada(primeiro_dia_coluna, index_ultimo_dia_mes);
 
 	if(estao_dias_td_marcados_){
-		disponibilizarColuna(primeiro_dia_coluna, ultimo_dia_mes);
+		disponibilizarColuna(primeiro_dia_coluna, index_ultimo_dia_mes);
 	}else{
-		indisponibilizarColuna(primeiro_dia_coluna, ultimo_dia_mes);
+		indisponibilizarColuna(primeiro_dia_coluna, index_ultimo_dia_mes);
 	}
 }
 function caminharAteEncontrarDiaNaLinha(primeiro_dia_mes, index_semana) {
@@ -50,17 +50,6 @@ function estaLinhaTodaMarcada(aux_date, index_limite) {
 		}
 	}
 	return estao_dias_td_marcados_;
-	/*
-	var pivo = new Date(d);
-	pivo.setDate(pivo.getDate()+1);
-	while(!ehSegundaFeira(pivo) && pivo.getDate() != index_ultimo_dia_linha){
-		if(!dias_marcados.includes(formatDate(pivo, 0))){//checa se dia esta disponivel
-			return false;
-		}
-		pivo.setDate(pivo.getDate()+1);
-	}
-	return true;
-	*/
 }
 function disponibilizarLinha(data_pivo, index_limite) {
 	while(data_pivo.getDate() < index_limite){	
@@ -87,7 +76,7 @@ function indisponibilizarLinha(data_pivo, index_limite) {
 function marcarSemana(index_semana, index_mes, ano){
 	var primeiro_dia_mes = getPrimeiroDiaMes(index_mes, ano);
 	var primeiro_dia_linha = caminharAteEncontrarDiaNaLinha(primeiro_dia_mes, index_semana);
-	var index_ultimo_dia_mes = (getUltimoDiaMes(index_mes, ano)).getDate();
+	var index_ultimo_dia_mes = getIndexUltimoDiaMes(index_mes, ano);
 	var index_ultimo_dia_linha = getIndexUltimoDiaLinha(primeiro_dia_linha, index_ultimo_dia_mes);
 	var estao_dias_td_marcados_ = estaLinhaTodaMarcada(primeiro_dia_linha, index_ultimo_dia_linha);
 
@@ -101,16 +90,15 @@ function marcarSemana(index_semana, index_mes, ano){
 }
 //retorna o obj Date 1º de Janeiro de 2018 ex
 function getPrimeiroDiaMes(index_mes, ano) {
-	var aux_str = "20"+ano+"-"+index_mes+"-01";//pega 1o dia no mês desse dia da semana<
 	return new Date("20"+ano, index_mes-1, 1);
 }
 //retorna o obj Date 1º de Janeiro de 2018 ex
-function getUltimoDiaMes(index_mes, ano) {
+function getIndexUltimoDiaMes(index_mes, ano) {
 	var aux_str = "20"+ano+"-"+index_mes+"-02";//pega 1o dia no mês desse dia da semana<
 	var d = new Date(aux_str);	
 	d.setMonth(d.getMonth()+1);
 	d.setDate(0);
-	return d;
+	return d.getDate();
 }
 function getIndexUltimoDiaLinha(primeiro_dia_linha, index_ultimo_dia_mes){
 	var d = new Date(primeiro_dia_linha);
@@ -121,33 +109,34 @@ function getIndexUltimoDiaLinha(primeiro_dia_linha, index_ultimo_dia_mes){
 } 
 //avança nos dias a partir de uma data ate encontrar a primeira "quarta" (ex). Não foi feita para funcionar entre 2 meses
 function caminharAteEncontrarDiaNaColuna(data_pivo, dia_semana_desejado) {
+	dia_semana_desejado++;//pq ele começar de segunda
+	dia_semana_desejado = dia_semana_desejado%7;//p n extrapolar fazendo 7=0
 	while(data_pivo.getDay() != dia_semana_desejado){
 		data_pivo.setDate(data_pivo.getDate() + 1);
 	}
-
-	data_pivo.setDate(data_pivo.getDate() + 1);//pega 1o dia no mês desse dia da semana>
+	console.log("pd: "+data_pivo.getDay()+" dia_semana_desejado: "+dia_semana_desejado);
 	return data_pivo;
 }
-function estaColunaTodaMarcada(aux_date, ultimo_dia_mes) {
+function estaColunaTodaMarcada(aux_date, index_ultimo_dia_mes) {
 	//se todos os dias estão marcados então ele deve disponibilizar todos, mas se tem só um disponivel, o botão deve servir pra marcar todos
 	var estao_dias_td_marcados_ = true;
 
-	for (var i = 0; (aux_date.getDate()+i)<=ultimo_dia_mes.getDate(); i+=7) {
+	for (var i = 0; (aux_date.getDate()+i)<=index_ultimo_dia_mes; i+=7) {
 		if(!dias_marcados.includes(formatDate(aux_date, i))){//checa se dia esta disponivel
 			estao_dias_td_marcados_ = false;
 		}
 	}
 	return estao_dias_td_marcados_;
 }
-function disponibilizarColuna(aux_date, ultimo_dia_mes){
-	for (var i = 0; (aux_date.getDate()+i)<=ultimo_dia_mes.getDate(); i+=7) {
+function disponibilizarColuna(aux_date, index_ultimo_dia_mes){
+	for (var i = 0; (aux_date.getDate()+i)<=index_ultimo_dia_mes; i+=7) {
 		if(dias_marcados.includes(formatDate(aux_date, i))){
 			disponibilizar(formatDate(aux_date, i));
 		}
 	}
 }
-function indisponibilizarColuna(aux_date, ultimo_dia_mes){
-	for (var i = 0; (aux_date.getDate()+i)<=ultimo_dia_mes.getDate(); i+=7) {
+function indisponibilizarColuna(aux_date, index_ultimo_dia_mes){
+	for (var i = 0; (aux_date.getDate()+i)<=index_ultimo_dia_mes; i+=7) {
 		if(!dias_marcados.includes(formatDate(aux_date, i))){
 			indisponibilizar(formatDate(aux_date, i));
 		}
